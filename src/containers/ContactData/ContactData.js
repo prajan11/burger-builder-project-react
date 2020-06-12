@@ -15,6 +15,11 @@ class ContactData extends Component {
           placeholder: "Your Name",
         },
         value: "",
+        validation: {
+          required: true,
+        },
+        valid: false,
+        touched: false,
       },
       street: {
         elementType: "input",
@@ -23,6 +28,11 @@ class ContactData extends Component {
           placeholder: "Street",
         },
         value: "",
+        validation: {
+          required: true,
+        },
+        valid: false,
+        touched: false,
       },
       zipCode: {
         elementType: "input",
@@ -31,6 +41,13 @@ class ContactData extends Component {
           placeholder: "Zip Code",
         },
         value: "",
+        validation: {
+          required: true,
+          minLength: 5,
+          maxLength: 5,
+        },
+        valid: false,
+        touched: false,
       },
       country: {
         elementType: "input",
@@ -39,6 +56,11 @@ class ContactData extends Component {
           placeholder: "Country",
         },
         value: "",
+        validation: {
+          required: true,
+        },
+        valid: false,
+        touched: false,
       },
       email: {
         elementType: "input",
@@ -47,6 +69,11 @@ class ContactData extends Component {
           placeholder: "Your Email",
         },
         value: "",
+        validation: {
+          required: true,
+        },
+        valid: false,
+        touched: false,
       },
       deliveryMethod: {
         elementType: "select",
@@ -57,11 +84,30 @@ class ContactData extends Component {
           ],
         },
         value: "",
+        touched: false,
+        valid: true,
+        validation: {},
       },
     },
-
+    formIsValid: false,
     loading: false,
   };
+
+  checkValidity = (value, rules) => {
+    let isValid = true;
+
+    if (rules.required) {
+      isValid = value.trim() !== "" && isValid;
+    }
+    if (rules.minLength) {
+      isValid = value.length >= rules.minLength && isValid;
+    }
+    if (rules.maxLength) {
+      isValid = value.length <= rules.minLength && isValid;
+    }
+    return isValid;
+  };
+
   orderHandler = (event) => {
     event.preventDefault();
     this.setState({ loading: true });
@@ -86,15 +132,24 @@ class ContactData extends Component {
         this.setState({ loading: false });
         console.log(error);
       });
-    console.log(this.props.ingredients);
   };
 
   inputChangedHandler = (event, inputIdentifier) => {
     const stateOrderForm = { ...this.state.orderForm };
     const updatedStateOrderForm = { ...stateOrderForm[inputIdentifier] };
     updatedStateOrderForm.value = event.target.value;
+    updatedStateOrderForm.valid = this.checkValidity(
+      updatedStateOrderForm.value,
+      updatedStateOrderForm.validation
+    );
+    updatedStateOrderForm.touched = true;
     stateOrderForm[inputIdentifier] = updatedStateOrderForm;
-    this.setState({ orderForm: stateOrderForm });
+    let isFormValid = true;
+    for (let inputIdentifier in stateOrderForm) {
+      isFormValid = stateOrderForm[inputIdentifier].valid && isFormValid;
+    }
+
+    this.setState({ orderForm: stateOrderForm, formIsValid: isFormValid });
   };
 
   render() {
@@ -104,17 +159,27 @@ class ContactData extends Component {
     }
     let form = (
       <form onSubmit={this.orderHandler}>
-        {formElementsArray.map((formElement) => (
-          <Input
-            key={formElement.id}
-            elementType={formElement.config.elementType}
-            elementConfig={formElement.config.elementConfig}
-            value={formElement.config.value}
-            changed={(event) => this.inputChangedHandler(event, formElement.id)}
-          />
-        ))}
-
-        <Button btnType="Success" clicked={this.orderHandler}>
+        {formElementsArray.map((formElement) => {
+          return (
+            <Input
+              key={formElement.id}
+              elementType={formElement.config.elementType}
+              elementConfig={formElement.config.elementConfig}
+              value={formElement.config.value}
+              changed={(event) =>
+                this.inputChangedHandler(event, formElement.id)
+              }
+              invalid={!formElement.config.valid}
+              shouldValidate={formElement.config.validation}
+              touched={formElement.config.touched}
+            />
+          );
+        })}
+        <Button
+          btnType="Success"
+          clicked={this.orderHandler}
+          disabled={!this.state.formIsValid}
+        >
           Order
         </Button>
       </form>
