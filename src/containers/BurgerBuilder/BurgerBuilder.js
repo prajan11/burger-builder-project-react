@@ -8,6 +8,8 @@ import axios from "../../axios-orders.js";
 import Spinner from "../../components/UI/Spinner/Spinner.js";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler.js";
 
+import { connect } from "react-redux";
+
 const INGREDIENT_PRICES = {
   salad: 0.5,
   cheese: 0.4,
@@ -25,15 +27,14 @@ class BurgerBuilder extends Component {
     error: false,
   };
 
-  componentDidMount() {
-    console.log(this.props);
-    axios
-      .get("https://react-burger-app-f0082.firebaseio.com/ingredients.json")
-      .then((response) => {
-        this.setState({ ingredients: response.data });
-      })
-      .catch((error) => this.setState({ error: true }));
-  }
+  // componentDidMount() {
+  //   axios
+  //     .get("https://react-burger-app-f0082.firebaseio.com/ingredients.json")
+  //     .then((response) => {
+  //       this.setState({ ingredients: response.data });
+  //     })
+  //     .catch((error) => this.setState({ error: true }));
+  // }
 
   updatePurchaseState = (ingredients) => {
     const sum = Object.keys(ingredients)
